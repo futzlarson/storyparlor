@@ -17,4 +17,11 @@ ENV LOG_CHANNEL stderr
 # Allow composer to run as root
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
-CMD ["/start.sh"]
+# Deploy commands
+WORKDIR $WEBROOT
+RUN composer install
+RUN php artisan key:generate
+RUN php artisan migrate
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
