@@ -18,7 +18,7 @@ ENV LOG_CHANNEL stderr
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
 # Deploy commands
-WORKDIR $WEBROOT
+WORKDIR /var/www/html
 RUN composer install
 RUN php artisan key:generate
 RUN php artisan migrate
