@@ -6,8 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Mail\Markdown;
 use App\Models\Customer;
 
-const UPDATE_CUSTOMERS = true;
-
 Route::get('readme', function () {
     $content = File::get(base_path('README.md'));
     $html = Markdown::parse($content);
@@ -54,9 +52,14 @@ Route::post('/', function(Request $req) {
 
         $email = $d['Email'];
         $quantity = $row['quantity'] = intval($d['Lineitem quantity']);
-        $row['last'] = getLastName($d);
-        $row['first'] = getFirstName($d, $row['last']);
+        // $row['last'] = getLastName($d);
+        // $row['first'] = getFirstName($d, $row['last']);
         $row['discount_code'] = ($d['Discount Code'] == 'null') ? null : $d['Discount Code'];
+
+        $fullName = $d['Billing Name'];
+        $nameParts = explode(' ', trim($fullName));
+        $row['last'] = end($nameParts);
+        $row['first'] = str_replace(" {$row['last']}", '', $fullName);
 
         if (! $event) {
             $event = $d['Lineitem name'];
@@ -64,15 +67,16 @@ Route::post('/', function(Request $req) {
         }
 
         $customer = Customer::where('email', $email)->first();
+        $update = env('UPDATE_CUSTOMERS', true);
         if ($customer && $customer->exists()) {
-            if (UPDATE_CUSTOMERS) {
+            if ($update) {
                 $customer->tickets += $quantity;
                 $customer->save();
             }
 
             $row['welcome'] = $customer->created_at->isToday();
         } else {
-            if (UPDATE_CUSTOMERS) {
+            if ($update) {
                 $customer = Customer::create([
                     'email' => $email,
                     'tickets' => $quantity
@@ -95,13 +99,3 @@ Route::post('/', function(Request $req) {
 
     return view('checkin', compact('event', 'cost', 'sold'))->with('rows', $data);
 });
-
-function getFirstName($field, $last) {
-    return str_replace(" $last", '', $field['Billing Name']);
-}
-function getLastName($field) {
-    $fullName = $field['Billing Name'];
-    $nameParts = explode(' ', trim($fullName));
-
-    return end($nameParts);
-}
