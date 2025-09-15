@@ -17,7 +17,12 @@ Route::get('readme', function () {
 });
 
 Route::get('/', function () {
-    return view('checkin')->with('rows', false);
+
+    $errors = Customer::exists() ? [] : [
+        'No customer data available. Run import.'
+    ];
+
+    return view('checkin')->with('rows', false)->withErrors($errors);
 });
 
 Route::post('/', function(Request $req) {
