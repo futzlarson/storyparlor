@@ -17,7 +17,7 @@
         </style>
         <title>{{ $event ?? config('app.name') }}</title>
      </head>
-    <body x-data="load">
+    <body @if ($rows)x-data="load"@endif>
         <nav class="navbar bg-dark">
             <div class="container-fluid">
                 <a class="navbar-brand text-white fw-bold" href="/">
