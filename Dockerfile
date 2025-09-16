@@ -15,8 +15,7 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 # Deploy commands
 WORKDIR /var/www/html
 RUN composer install --no-dev --optimize-autoloader
-RUN touch .env
-#RUN cp .env.example .env
+RUN cp .env.example .env
 RUN php artisan key:generate
 RUN php artisan migrate
 RUN php artisan config:cache
