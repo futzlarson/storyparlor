@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Markdown;
 use App\Models\Customer;
@@ -15,15 +16,13 @@ Route::get('readme', function () {
 });
 
 Route::get('/', function () {
-
-    $errors = Customer::exists() ? [] : [
-        'No customer data available. Run import.'
-    ];
-
-    return view('checkin')->with('rows', false)->withErrors($errors);
+    return view('checkin')->with('rows', false);
 });
 
 Route::post('/', function(Request $req) {
+    if (! Customer::exists())
+        return view('checkin')->with('rows', false)->withErrors([ 'No customer data available. Run import first.' ]);
+
     $req->validate([
         'file' => 'required|mimes:csv',
     ]);

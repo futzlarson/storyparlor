@@ -1,35 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+@extends('layouts.app')
 
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>">
+@section('content')
 
-        <style>
-            input[type="checkbox"] {
-                transform: scale(1.5);
-            }
-            input[type="text"] {
-                min-width: 300px;
-            }
-        </style>
-        <title>{{ $event ?? config('app.name') }}</title>
-     </head>
-    <body @if ($rows)x-data="load"@endif>
-        <nav class="navbar bg-dark">
-            <div class="container-fluid">
-                <a class="navbar-brand text-white fw-bold" href="/">
-                    <span class="me-1">🎭</span>
-                    {{ config('app.name') }}
-                </a>
-            </div>
-        </nav>
-
-        {{-- Checkin. --}}
-        @if ($rows)
+    {{-- Checkin. --}}
+    @if ($rows)
+        <div x-data="load">
             <div class="row p-4 pb-0 bg-white sticky-top justify-content-between border-bottom border-secondary-subtle">
                 <div class="col">
                     <h2 class="mb-3">
@@ -124,73 +99,83 @@
                     </table>
                 </div>
             </div>
+        </div>
 
-            <script>
-                function load() {
-                    return {
-                        sold: @json($sold),
-                        totalAvailable: 49,
+        <script>
+            function load() {
+                return {
+                    sold: @json($sold),
+                    totalAvailable: 49,
 
-                        list: @json($rows),
+                    list: @json($rows),
 
-                        get available() {
-                            let num = this.totalAvailable - this.sold;
-                            return num == 0 ? 'SOLD&nbsp;OUT' : num;
-                        },
-                        get checkedIn() { return this.list.reduce((sum, row) => sum + row.checked_in, 0)},
-                        get remaining() { return this.sold - this.checkedIn },
-                        get soldOut() { return this.totalAvailable == this.sold },
+                    get available() {
+                        let num = this.totalAvailable - this.sold;
+                        return num == 0 ? 'SOLD&nbsp;OUT' : num;
+                    },
+                    get checkedIn() { return this.list.reduce((sum, row) => sum + row.checked_in, 0)},
+                    get remaining() { return this.sold - this.checkedIn },
+                    get soldOut() { return this.totalAvailable == this.sold },
 
-                        get ready() { return this.list.filter(i => ! i.done) },
-                        get done() {
-                            return this.list.filter(i => i.done);
-                        },
+                    get ready() { return this.list.filter(i => ! i.done) },
+                    get done() {
+                        return this.list.filter(i => i.done);
+                    },
 
-                        handleCheck(row, event) {
-                            if (event.target.checked)
-                                row.checked_in++;
-                            else
-                                row.checked_in--;
+                    handleCheck(row, event) {
+                        if (event.target.checked)
+                            row.checked_in++;
+                        else
+                            row.checked_in--;
 
-                            // console.log('checked_in ' + row.checked_in + ' vs quantity ' + row.quantity);
-                            row.done = (row.checked_in == row.quantity);
-                            // console.log('row done', row.done);
-                        }
+                        // console.log('checked_in ' + row.checked_in + ' vs quantity ' + row.quantity);
+                        row.done = (row.checked_in == row.quantity);
+                        // console.log('row done', row.done);
                     }
                 }
-            </script>
+            }
+        </script>
 
-        {{--  Upload. --}}
-        @else
-            <div class="p-5">
-                <h1>Upload file</h1>
+    {{--  Upload. --}}
+    @else
+        <div class="p-5">
+            <h1>Upload file</h1>
 
-                @if ($errors->any())
-                    <div class="alert alert-danger d-inline-block">
-                        {{ $errors->first() }}
-                    </div>
-                @endif
+            @if ($errors->any())
+                <div class="alert alert-danger d-inline-block">
+                    {{ $errors->first() }}
+                </div>
+            @endif
 
-                <p>This is the check-in tool for Story Parlor. It accepts a CSV file from Squarespace.</p>
-                <ol>
-                    <li>
-                        <a class="btn btn-sm btn-success" href="https://mandarin-synthesizer-k3yg.squarespace.com/config/commerce/orders" target="_blank">Open the Orders page in Squarespace</a>
-                    </li>
-                    <li>Click <span class="fw-bold">DOWNLOAD CSV</span> in the upper right</li>
-                    <li>Under Product, select <span class="fw-bold">Specific product</span></li>
-                    <li>Type in the event name and select tonight's event</li>
-                    <li>Click <span class="fw-bold">DOWNLOAD</span> in the top right</li>
-                    <li>Open the Files app, find the file likely named <code>orders</code> and rename it to avoid confusion</li>
-                    <li>Select that file here</li>
-                </ol>
+            <p>This is the check-in tool for Story Parlor. It accepts a CSV file from Squarespace.</p>
+            <ol>
+                <li>
+                    <a class="btn btn-sm btn-success" href="https://mandarin-synthesizer-k3yg.squarespace.com/config/commerce/orders" target="_blank">Open the Orders page in Squarespace</a>
+                </li>
+                <li>Click <span class="fw-bold">DOWNLOAD CSV</span> in the upper right</li>
+                <li>Under Product, select <span class="fw-bold">Specific product</span></li>
+                <li>Type in the event name and select tonight's event</li>
+                <li>Click <span class="fw-bold">DOWNLOAD</span> in the top right</li>
+                <li>Open the Files app, find the file likely named <code>orders</code> and rename it to avoid confusion</li>
+                <li>Select that file here</li>
+            </ol>
 
-                <form class="mt-2 d-inline-block" enctype="multipart/form-data" method="post" onchange="document.getElementById('process').removeAttribute('disabled')">
-                    @csrf
-                    <input class="form-control form-control-lg mb-4" name="file" type="file">
+            <form x-data="{ fileSelected: false, processing: false }"
+                @submit="processing = true"
+                class="mt-2 d-inline-block"
+                enctype="multipart/form-data"
+                method="post">
+                @csrf
+                <input @change="fileSelected = $event.target.files.length > 0" 
+                    class="form-control form-control-lg mb-4"
+                    name="file"
+                    type="file">
 
-                    <button class="btn btn-primary" disabled id="process">Process</button>
-                </form>
-            </div>
-        @endif
-    </body>
-</html>
+                <button :disabled="!fileSelected || processing" 
+                    x-text="processing ? 'Processing...' : 'Process'"
+                    :disabled="disabled"
+                    class="btn btn-primary">Process</button>
+            </form>
+        </div>
+    @endif
+@endsection
