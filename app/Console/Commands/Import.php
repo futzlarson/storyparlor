@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use App\Models\Customer;
 
 class Import extends Command
 {
@@ -27,7 +26,7 @@ class Import extends Command
      */
     public function handle()
     {
-        $file = storage_path('app/' . $this->argument('file'));
+        $file = $this->argument('file');
         if (! file_exists($file)) {
             $this->error("$file does not exist");
             die();
@@ -35,8 +34,8 @@ class Import extends Command
 
         DB::table('customers')->truncate();
 
-        $added = 0;
-        $headers = [];
+        $orders = 0;
+        $headers = $customers = [];
         $handle = fopen($file, 'r');
 
         if (($headerRow = fgetcsv($handle)) !== false)
@@ -48,24 +47,29 @@ class Import extends Command
             if ($d['Financial Status'] == 'PAID') {
                 $email = $d['Email'];
                 $quantity = intval($d['Lineitem quantity']);
-                $customer = Customer::where('email', $email)->first();
+                @$customers[$email] += $quantity;
 
-                if ($customer && $customer->exists()) {
-                    $customer->tickets += $quantity;
-                    $customer->save();
-                } else {
-                    $customer = Customer::create([
-                        'email' => $email,
-                        'tickets' => $quantity
-                    ]);
-                }
-
-                $added++;
+                $orders++;
             }
         }
 
         fclose($handle);
 
-        $this->info("added $added customers");
+        $data = [];
+        foreach ($customers as $email => $tickets) {
+            $data[] = [
+                'email' => $email,
+                'tickets' => $tickets,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        DB::table('customers')->insert($data);
+
+        $msg = "added $orders orders and " . count($customers) . " customers";
+        $this->info($msg);
+
+        return $msg;
     }
 }

@@ -99,3 +99,28 @@ Route::post('/', function(Request $req) {
 
     return view('checkin', compact('event', 'cost', 'sold'))->with('rows', $data);
 });
+
+Route::get('import', function () {
+    return view('import');
+});
+
+Route::post('import', function(Request $req) {
+    ini_set('upload_max_filesize', '10M');
+    ini_set('post_max_size', '10M');
+
+    $file = $req->file('file');
+    if (! $file->isValid())
+        die($file->getErrorMessage());
+
+    $req->validate([
+        'file' => 'required|mimes:csv',
+    ]);
+
+    $path = $file->getRealPath();
+    Artisan::call('app:import', [
+        'file' => $path
+    ]);
+    $output = Artisan::output();
+
+    return back()->with('success', $output);
+});
