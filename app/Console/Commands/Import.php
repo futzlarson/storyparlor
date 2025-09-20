@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
+use App\Services\SquarespaceService;
 
 class Import extends Command
 {
@@ -21,55 +21,26 @@ class Import extends Command
      */
     protected $description = 'Import all orders from a csv into the customer table';
 
+    public function __construct(
+        private SquarespaceService $squarespace
+    ) {
+        parent::__construct();
+    }
+
     /**
      * Execute the console command.
      */
     public function handle()
     {
         $file = $this->argument('file');
-        if (! file_exists($file)) {
-            $this->error("$file does not exist");
-            die();
+        
+        try {
+            $result = $this->squarespace->importCustomers($file);
+            $this->info($result);
+            return $result;
+        } catch (\Exception $e) {
+            $this->error("Import failed: " . $e->getMessage());
+            return false;
         }
-
-        DB::table('customers')->truncate();
-
-        $orders = 0;
-        $headers = $customers = [];
-        $handle = fopen($file, 'r');
-
-        if (($headerRow = fgetcsv($handle)) !== false)
-            $headers = $headerRow;
-
-        while (($line = fgetcsv($handle)) !== false) {
-            $d = array_combine($headers, $line);
-
-            if ($d['Financial Status'] == 'PAID') {
-                $email = $d['Email'];
-                $quantity = intval($d['Lineitem quantity']);
-                @$customers[$email] += $quantity;
-
-                $orders++;
-            }
-        }
-
-        fclose($handle);
-
-        $data = [];
-        foreach ($customers as $email => $tickets) {
-            $data[] = [
-                'email' => $email,
-                'tickets' => $tickets,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-
-        DB::table('customers')->insert($data);
-
-        $msg = "added $orders orders and " . count($customers) . " customers";
-        $this->info($msg);
-
-        return $msg;
     }
 }

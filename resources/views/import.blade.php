@@ -1,14 +1,5 @@
 @extends('layouts.app')
 
-@push('styles')
-    input[type="checkbox"] {
-        transform: scale(1.5);
-    }
-    input[type="text"] {
-        min-width: 300px;
-    }
-@endpush
-
 @section('content')
 
 <div class="p-5">
