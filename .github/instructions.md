@@ -11,6 +11,10 @@
 - Use ALL_CAPS for constants
 
 ## Code Quality
-- Use meaningful variable and function names that clearly describe their purpose
+- Use meaningful variable and function names that clearly describe their purpose. That said, short variable names are okay in small scopes
 - Include helpful comments for complex logic
 - Add error handling for user inputs and API calls
+
+## Testing
+- For testing, use Pest
+- Use factories for faking data
