@@ -1,7 +1,8 @@
 #!/bin/sh
 
-# Generate application key if needed
-if [ ! -f .env ]; then
+# If .env missing and no APP_KEY, generate application key (local Docker)
+if [ ! -f .env ] && [ -z "$APP_KEY" ]; then
+    echo "Generating .env for local Docker"
     cp .env.example .env
     php artisan key:generate
 fi
