@@ -2,6 +2,9 @@ FROM richarvey/nginx-php-fpm:3.1.6
 
 COPY . .
 
+# Fix nginx config for Laravel routing
+RUN sed -i 's|try_files $uri $uri/ =404;|try_files $uri $uri/ /index.php?$query_string;|g' /etc/nginx/sites-available/default.conf
+
 # Image config
 ENV SKIP_COMPOSER=1
 ENV WEBROOT=/var/www/html/public
