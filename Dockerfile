@@ -17,4 +17,5 @@ WORKDIR /var/www/html
 RUN composer install --no-dev --optimize-autoloader
 
 # Runtime commands
+RUN chmod +x init.sh && mv init.sh /init.sh
 ENTRYPOINT ["/init.sh"]
